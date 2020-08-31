@@ -192,7 +192,7 @@ function GetIntelName($intelId){
 
 $Script:sessionHeader = GetNewSessionID
 foreach($intelId in $intelIdArray){
-    foreach($computerGroupName in $allPPLgroupsNames){
+    foreach($computerGroupName in $allgroupsNames){
         $intelIdName = GetIntelName $intelId
         Write-Host -NoNewline "Rule: " 
         Write-Host -NoNewline -ForegroundColor Cyan $intelIdName.name
@@ -201,7 +201,7 @@ foreach($intelId in $intelIdArray){
         Write-Host "."
         Read-Host -Prompt "Press enter to start Quick Scan on group $computerGroupName..."
 
-        $curQuickScanId = StartQuickscan $allPPLgroupsForQS[$computerGroupName] $intelId
+        $curQuickScanId = StartQuickscan $allgroupsForQS[$computerGroupName] $intelId
         $returnQuickscanHashtable[$curQuickScanId.id] = $curQuickScanId.questionId
     }
 }
