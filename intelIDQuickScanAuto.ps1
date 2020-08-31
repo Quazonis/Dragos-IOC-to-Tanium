@@ -1,5 +1,5 @@
 ﻿# Pass an array of intel IDs and this will initate quickScans on the configured computer groups below
-#Nathaniel Nieuwendam
+#Nathaniel Nieuwendam.
 
 
 #placeholder for intel ID to quick scan. You may define this with the param -intelIdArray
