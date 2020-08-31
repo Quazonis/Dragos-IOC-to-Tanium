@@ -521,12 +521,14 @@ While($destinyChooser -notlike "n"){
 }
 
 
+#Below Quickscans require configuration. YOU MUST POINT TO THE intelIDQuickScanAuto.ps1 file
 $userQuickscanChoice = "t"
 While($userQuickscanChoice -notlike "n"){
     $userQuickscanChoice = Read-Host "`nWould you like to begin Quick Scanning the last uploaded set of rules?(y/n)"
     if($userQuickscanChoice -like "y"){
         foreach($intelIdSingle in $intelIdsDragos){
-                & 'H:\synThis\PowerShell Scripts\intelQuickScanAuto.ps1' -intelIdArray $intelIdSingle
+                #location of intelIDQuickScanAuto.ps1 goes below
+                & '.\intelQuickScanAuto.ps1' -intelIdArray $intelIdSingle
         }
     }
 }
