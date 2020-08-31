@@ -113,10 +113,13 @@ function MetadatabyProductSerial($DSerialNum){
     catch{Write-Host ""$Error[0];pause}
 
     $contentCleaned = $DresponsePre.Content | ConvertFrom-Json
-    #remove quotes
-    if($contentCleaned.title -match 'Fox kitten' -and $contentCleaned.title -match 'Campaign Aligning With PARISITE'){
-        $contentCleaned.title = 'Assessment of Fox Kitten Campaign Aligning With PARISITE'
+
+    #remove quotes if needed
+    <#
+    if($contentCleaned.title -match 'original title' -and $contentCleaned.title -match 'original title'){
+        $contentCleaned.title = 'Title without quotes'
     }
+    #>
 
     $productArtifacts = $contentCleaned
     return $productArtifacts
