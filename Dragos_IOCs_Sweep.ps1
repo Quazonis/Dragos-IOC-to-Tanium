@@ -90,7 +90,6 @@ function ProxyLogonCheck(){
     return $proxyInfo
 
 }
-
 function GetLatestProducts(){
     try{$DresponsePre = Invoke-WebRequest -Uri $Global:DRAGOSURI/api/v1/products -Headers $Global:DragosHeader -Proxy $Global:proxyInfoSet.proxy -ProxyCredential $Global:proxyInfoSet.cred -Method GET}
     catch{$Error[0];pause}
@@ -146,8 +145,6 @@ function IndicatorsSHA256HashesOnly($dateLookback){
 
 }
 
-function DragosIOCtoHashTable(){}
-
 #From the UploadQuickAdd
 function BuildJsonQuickAdd($name,$indicators,$fileType){
     $quickAddJson = @{
@@ -162,13 +159,20 @@ function SubmitNewQuickAdd($intelDocSubmission){
     $convertedSubmit = $intelDocSubmission | ConvertTo-Json -Depth 10
     Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/plugin/products/detect3/api/v1/intels/quick-add -Method Post -Headers $Global:sessionHeader -Body $convertedSubmit}
     Catch{Write-Host "`nsubmission call failed, did your session key expire?`n";$Error[0]
-        Try{$Global:sessionHeader = GetNewSessionID}
-        Catch{Write-Host "Try again...";$Global:sessionHeader = GetNewSessionID}
-        Write-Host $Global:sessionHeader
+        if($error[0].ErrorDetails.Message -match "HTTP 401: Unauthorized."){
+            Try{$Global:sessionHeader = GetNewSessionID}
+            Catch{Write-Host "Try again...";$Global:sessionHeader = GetNewSessionID}
+            Write-Host $Global:sessionHeader
         
-    Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/plugin/products/detect3/api/v1/intels/quick-add -Method -Headers $Global:sessionHeader -Body $convertedSubmit}
-    Catch{Write-Host "Ok still failing. You suck. Exiting.....";$Error[0];pause;exit}
+            Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/plugin/products/detect3/api/v1/intels/quick-add -Method Post -Headers $Global:sessionHeader -Body $convertedSubmit}
+            Catch{Write-Host "Ok still failing. Likely unable to renew session key...";$Error[0];pause;exit}
+        }
+        else{
+            Write-Host "Failed to complete API call! Check your API submit..."
+            $Error[0];pause;exit
+        }
     }
+
     $serverResponse = $PREserverResponse.OuterXml
     Write-Host -NoNewline "Server Parsed: " 
     Write-Host -NoNewline -ForegroundColor Cyan $PREserverResponse.ioc.short_description 
@@ -181,12 +185,18 @@ function SubmitIntelXML($xmlObj){
     $Global:sessionHeader.'Content-Type' = "application/xml"
     Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/plugin/products/detect3/api/v1/intels -Method Post -Headers $Global:sessionHeader -Body $xmlObj}
     Catch{Write-Host "`nsubmission call failed, did your session key expire?`n";$Error[0]
-        Try{$Global:sessionHeader = GetNewSessionID}
-        Catch{Write-Host "Try again...";$Global:sessionHeader = GetNewSessionID}
-        Write-Host $Global:sessionHeader
+        if($error[0].ErrorDetails.Message -match "HTTP 401: Unauthorized."){
+            Try{$Global:sessionHeader = GetNewSessionID}
+            Catch{Write-Host "Try again...";$Global:sessionHeader = GetNewSessionID}
+            Write-Host $Global:sessionHeader
         
-    Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/plugin/products/detect3/api/v1/intels -Method Post -Headers $Global:sessionHeader -Body $xmlObj}
-    Catch{Write-Host "Ok still failing. You suck. Exiting.....";$Error[0];pause;exit}
+            Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/plugin/products/detect3/api/v1/intels -Method Post -Headers $Global:sessionHeader -Body $xmlObj}
+            Catch{Write-Host "Ok still failing. Likely unable to renew session key...";$Error[0];pause;exit}
+        }
+        else{
+            Write-Host "Failed to complete API call! Check your API submit..."
+            $Error[0];pause;exit
+        }
     }
     $serverResponse = $PREserverResponse
     Write-Host -NoNewline "Rule: " 

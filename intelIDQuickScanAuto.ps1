@@ -61,25 +61,19 @@ function GetNewSessionID{
 }
 function GetComputerGroups($APIheader) {
     Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/api/v2/groups -Method Get -Headers $APIheader}
-    Catch{
-        Write-Host "`nAPI call failed, did your session key expire?`n"
+    Catch{Write-Host "`nsubmission call failed, did your session key expire?`n";$Error[0]
         if($error[0].ErrorDetails.Message -match "HTTP 401: Unauthorized."){
-            Try{$Script:sessionHeader = GetNewSessionID}
-            Catch{
-                Write-Host "`nBad Credentials...`n";pause;exit}
-            Write-Host $Script:sessionHeader.session
-            $APIheader = $Script:sessionHeader
+            Try{$Global:sessionHeader = GetNewSessionID}
+            Catch{Write-Host "Try again...";$Global:sessionHeader = GetNewSessionID}
+            Write-Host $Global:sessionHeader
+        
             Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/api/v2/groups -Method Get -Headers $APIheader}
-            Catch{
-                Write-Host "Failed to get computer groups! Check your creds..."
-                return 47
-            }
+            Catch{Write-Host "Ok still failing. Likely unable to renew session key...";$Error[0];pause;exit}
         }
         else{
-            Write-Host "Failed to retreive computer groups! Check your API submit..."
-            return 47
+            Write-Host "Failed to complete API call! Check your API submit..."
+            $Error[0];pause;exit
         }
-
     }
 
     $serverResponse = $PREserverResponse.data
@@ -133,12 +127,18 @@ function StartQuickscan($computerGroup,$intelID){
             pause
             break
         }
-        Try{$Global:sessionHeader = GetNewSessionID}
-        Catch{Write-Host "Try again...";$Global:sessionHeader = GetNewSessionID}
-        Write-Host $Global:sessionHeader
+        if($error[0].ErrorDetails.Message -match "HTTP 401: Unauthorized."){
+            Try{$Global:sessionHeader = GetNewSessionID}
+            Catch{Write-Host "Try again...";$Global:sessionHeader = GetNewSessionID}
+            Write-Host $Global:sessionHeader
         
-        Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/plugin/products/detect3/api/v1/quick-scans -Method Post -Headers $Global:sessionHeader -Body $quickscanJson}
-        Catch{Write-Host "Ok still failing. You suck. Exiting.....";$Error[0];pause;exit}
+            Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/plugin/products/detect3/api/v1/quick-scans -Method Post -Headers $Global:sessionHeader -Body $quickscanJson}
+            Catch{Write-Host "Ok still failing. Likely unable to renew session key...";$Error[0];pause;exit}
+        }
+        else{
+            Write-Host "Failed to complete API call! Check your API submit..."
+            $Error[0];pause;exit
+        }
     }
 
 
@@ -154,12 +154,18 @@ function StartQuickscan($computerGroup,$intelID){
 function CheckQuickscan($quickScanId){
     Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/plugin/products/detect3/api/v1/quick-scans -Method GET -Headers $Global:sessionHeader}
     Catch{Write-Host "`nsubmission call failed, did your session key expire?`n";$Error[0]
-        Try{$Global:sessionHeader = GetNewSessionID}
-        Catch{Write-Host "Try again...";$Global:sessionHeader = GetNewSessionID}
-        Write-Host $Global:sessionHeader
+        if($error[0].ErrorDetails.Message -match "HTTP 401: Unauthorized."){
+            Try{$Global:sessionHeader = GetNewSessionID}
+            Catch{Write-Host "Try again...";$Global:sessionHeader = GetNewSessionID}
+            Write-Host $Global:sessionHeader
         
-        Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/plugin/products/detect3/api/v1/quick-scans -Method GET -Headers $Global:sessionHeader}
-        Catch{Write-Host "Ok still failing. You suck. Exiting.....";$Error[0];pause;exit}
+            Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/plugin/products/detect3/api/v1/quick-scans -Method GET -Headers $Global:sessionHeader}
+            Catch{Write-Host "Ok still failing. Likely unable to renew session key...";$Error[0];pause;exit}
+        }
+        else{
+            Write-Host "Failed to complete API call! Check your API submit..."
+            $Error[0];pause;exit
+        }
     }
 
 
@@ -175,12 +181,18 @@ function CheckQuickscan($quickScanId){
 function GetIntelName($intelId){
     Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/plugin/products/detect3/api/v1/intels/$intelId -Method GET -Headers $Global:sessionHeader}
     Catch{Write-Host "`nsubmission call failed, did your session key expire?`n";$Error[0]
-        Try{$Global:sessionHeader = GetNewSessionID}
-        Catch{Write-Host "Try again...";$Global:sessionHeader = GetNewSessionID}
-        Write-Host $Global:sessionHeader
+        if($error[0].ErrorDetails.Message -match "HTTP 401: Unauthorized."){
+            Try{$Global:sessionHeader = GetNewSessionID}
+            Catch{Write-Host "Try again...";$Global:sessionHeader = GetNewSessionID}
+            Write-Host $Global:sessionHeader
         
-        Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/plugin/products/detect3/api/v1/intels/$intelId -Method GET -Headers $Global:sessionHeader}
-        Catch{Write-Host "Ok still failing. You suck. Exiting.....";$Error[0];pause;exit}
+            Try{$PREserverResponse = Invoke-RestMethod -Uri $ServerURI/plugin/products/detect3/api/v1/intels/$intelId -Method GET -Headers $Global:sessionHeader}
+            Catch{Write-Host "Ok still failing. Likely unable to renew session key...";$Error[0];pause;exit}
+        }
+        else{
+            Write-Host "Failed to complete API call! Check your API submit..."
+            $Error[0];pause;exit
+        }
     }
 
 
