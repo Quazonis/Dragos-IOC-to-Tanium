@@ -1,5 +1,5 @@
-# Collection of scripts to allow communication toe the Dragos API and Tanium API
-## Nathaniel Nieuwendam
+# Collection of scripts to allow communication to the Dragos API and Tanium API
+#### Nathaniel Nieuwendam
 
 * Dragos_IOCs_Sweep.ps1
 	* This will retrieve MD5 and SHA256 hashes for all Dragos releases as far day as you specify in days (Default 60)
